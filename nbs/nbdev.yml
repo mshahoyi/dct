@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "dct"
+  site-url: "https://mshahoyi.github.io/dct"
+  description: "Adapt the Deep Causal Transcoding technique by Andrew to change LLM as a judge evaluations"
+  repo-branch: main
+  repo-url: "https://github.com/mshahoyi/dct"

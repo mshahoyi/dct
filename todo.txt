@@ -1,0 +1,4 @@
+- get the prompt
+- get the logits for the right tokens at the right index
+    right index: one token before the actual number (that means one forward pass)
+    right tokens: tokens for the numbers
