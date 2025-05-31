@@ -35,6 +35,7 @@ class SlicedModel(nn.Module):
             self.layers_name = layers_name
         self.layers = rgetattr(self.model, self.layers_name)
         self.layers_name_split = self.layers_name.split(".")
+
     def reset(self):
         setattr(self.model.config, "num_hidden_layers",self.depth)
         setattr(rgetattr(self.model, ".".join(self.layers_name_split[:-1])), self.layers_name_split[-1], self.L)
@@ -45,11 +46,21 @@ class SlicedModel(nn.Module):
 
     def forward(self, h):
         # mutate model so that forward pass only runs the specified middle layers
+
+        # Original info
         self.L = self.layers
         self.depth = self.model.config.num_hidden_layers
+
         layers_name_split = self.layers_name_split
-        setattr(rgetattr(self.model, ".".join(layers_name_split[:-1])), layers_name_split[-1], self.L[self.start_layer:self.end_layer+1])
-        setattr(self.model.config, "num_hidden_layers",self.end_layer-self.start_layer)
+
+        # Sets the layers in the model only to the selected ones
+        selected_layers = self.L[self.start_layer:self.end_layer+1]
+        setattr(rgetattr(self.model, ".".join(layers_name_split[:-1])), layers_name_split[-1], selected_layers)
+
+        # Sets the number of layers in the model to the number of selected layers
+        setattr(self.model.config, "num_hidden_layers",self.end_layer-self.start_layer+1)
+        
+        # Sets the layer index for each layer
         for i in range(len(rgetattr(self.model, self.layers_name))):
             rgetattr(self.model, self.layers_name)[i].self_attn.layer_idx = i
 
@@ -58,6 +69,7 @@ class SlicedModel(nn.Module):
 
         # reset model to un-mutated state
         self.reset()
+
         return result
 
 class DeltaActivations(nn.Module):
