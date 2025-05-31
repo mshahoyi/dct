@@ -294,7 +294,7 @@ for i in range(NUM_EVAL):
 # ## Steer
 
 # %%
-MAX_NEW_TOKENS = 128
+MAX_NEW_TOKENS = 256
 from torch import nn
 
 # %%
@@ -316,6 +316,36 @@ for i in range(NUM_EVAL):
     print("====Steered by vector %d=========\n" % i)
     print(completions[i][len(instructions[0]):])
 
+#%%
+from functools import partial
+
+importlib.reload(core)
+save_vector = partial(core.save_vector, model_name=MODEL_NAME, source_layer_idx=SOURCE_LAYER_IDX, target_layer_idx=TARGET_LAYER_IDX, scale=INPUT_SCALE)
+
+save_vector(vector=V[:,indices[0]], concept="Medical history context")
+
+# %%
+import gradio as gr
+from transformers import pipeline
+
+model_editor.restore()
+# model_editor.steer(INPUT_SCALE*V[:,indices[0]], SOURCE_LAYER_IDX)
+chatbot = pipeline("text-generation", model=model, tokenizer=tokenizer, do_sample=False)
+
+def chat_fn(message, history):
+    conv = [{"role": "system", "content": SYSTEM_PROMPT}]
+    conv += [{"role": "user" if i%2 == 0 else "assistant", "content": h} for i, h in enumerate(history)]
+    conv += [{"role": "user", "content": message}]
+    chat = tokenizer.apply_chat_template(conv, add_special_tokens=False, tokenize=False, add_generation_prompt=True)
+    response = chatbot(chat, max_new_tokens=128)[0]['generated_text']
+    return response
+
+gr.ChatInterface(chat_fn).launch(inline=True)
+
+# %%
+import gc
+gc.collect()
+torch.cuda.empty_cache()
 
 # %% [markdown]
 # ## Detailed eval: unsteered
