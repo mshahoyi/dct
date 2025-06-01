@@ -6,6 +6,21 @@
 __all__ = ['get_prompt', 'get_prompt_suffix', 'save_vector']
 
 # %% ../nbs/00_core.ipynb 4
+def get_sys_prompt():
+    return """
+You are a helpful assistant. The user will give you two sentences; A and B. Choose the sentence with the better grammer. Your response should be in the following format:
+
+Response format:
+<A or B>: <Reason for your choice>
+"""
+
+def get_user_prompt():
+    return f"""A: Where is the dog?
+B: Where the dog is?
+"""
+
+
+
 def get_prompt(type: str, verbose=False):
     import datasets
 

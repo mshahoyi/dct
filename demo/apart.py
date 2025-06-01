@@ -1,4 +1,6 @@
 # %%
+import sys
+sys.path.append("../src")
 import dct
 from tqdm import tqdm
 import math
@@ -12,7 +14,7 @@ torch.manual_seed(325)
 # hyper-parameters
 
 # %%
-MODEL_NAME = "Qwen/Qwen1.5-0.5B-Chat"
+MODEL_NAME = "Qwen/Qwen2.5-3B-Instruct"
 TOKENIZER_NAME = MODEL_NAME
 
 INPUT_SCALE = None          # norm of steering vectors; set to None to use default calibration
@@ -31,16 +33,14 @@ DIM_OUTPUT_PROJECTION = 32 # output projection used for approximate jacobian cal
 NUM_ITERS = 10               # number of iterations
 
 NUM_FACTORS = 512           # number of factors to learn
-FACTOR_BATCH_SIZE = 256       # factor batch size
 
 SOURCE_LAYER_IDX = 10       # source layer
 TARGET_LAYER_IDX = 20       # target layer
 
-SYSTEM_PROMPT = "You are a helpful assistant" # system prompt; set to None for no system prompt
 
 TOKEN_IDXS = slice(-3,None) # target token positions
 
-NUM_EVAL = 128               # number of steering vectors to evaluate
+NUM_EVAL = 64               # number of steering vectors to evaluate
 
 
 
@@ -54,11 +54,13 @@ import sys
 sys.path.append("../dct")
 import importlib
 import core
+importlib.reload(core)
 
 PROMPOT_TYPE = 'flu'
+SYSTEM_PROMPT = core.get_sys_prompt() # system prompt; set to None for no system prompt
 
 importlib.reload(core)
-instructions = [core.get_prompt(PROMPOT_TYPE, verbose=False)]
+instructions = [core.get_user_prompt()]
 
 NUM_SAMPLES = 1
 print("Prompt: ", instructions[0])
@@ -75,10 +77,12 @@ if SYSTEM_PROMPT is not None:
 else:
     chat_init = []
 chats = [chat_init + [{'content': content, 'role':'user'}] for content in instructions[:NUM_SAMPLES]]
-EXAMPLES = [core.get_prompt_suffix(tokenizer.apply_chat_template(chat, add_special_tokens=False, tokenize=False, add_generation_prompt=True), PROMPOT_TYPE) for chat in chats]
+EXAMPLES = [tokenizer.apply_chat_template(chat, add_special_tokens=False, tokenize=False, add_generation_prompt=True) for chat in chats]
 
 test_chats = [chat_init + [{'content': content, 'role':'user'}] for content in instructions[-32:]]
-TEST_EXAMPLES = [core.get_prompt_suffix(tokenizer.apply_chat_template(chat, add_special_tokens=False, tokenize=False, add_generation_prompt=True), PROMPOT_TYPE) for chat in test_chats]
+TEST_EXAMPLES = [tokenizer.apply_chat_template(chat, add_special_tokens=False, tokenize=False, add_generation_prompt=True) for chat in test_chats]
+
+print(EXAMPLES[0])
 
 # %% [markdown]
 # # load model
@@ -86,14 +90,26 @@ TEST_EXAMPLES = [core.get_prompt_suffix(tokenizer.apply_chat_template(chat, add_
 
 # %%
 %%time
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+
+# bnb_cfg = BitsAndBytesConfig(
+#     load_in_4bit=True,
+#     bnb_4bit_quant_type="nf4",
+#     bnb_4bit_compute_dtype=torch.float16,
+#     bnb_4bit_use_double_quant=True
+# )
+
 model = AutoModelForCausalLM.from_pretrained(MODEL_NAME,
                                              device_map="auto",
+                                            #  quantization_config=bnb_cfg,
                                              trust_remote_code=True,
                                             #  torch_dtype=torch.float16,
                                              _attn_implementation="eager" # currently, `torch.func` only works well with eager attention 
                                             )
 
+
+# %%
+# torch.set_default_dtype(torch.float16)
 
 # %% [markdown]
 # # slice model
@@ -103,20 +119,29 @@ model = AutoModelForCausalLM.from_pretrained(MODEL_NAME,
 
 # %%
 importlib.reload(core)
-prompt = core.get_prompt("flu", verbose=False)
+model_inputs = tokenizer(EXAMPLES[:1], return_tensors="pt").to("cuda")
 
-model_inputs = tokenizer([prompt], return_tensors="pt", truncation=True).to(model.device)
 with torch.no_grad():
     hidden_states = model(model_inputs["input_ids"], output_hidden_states=True).hidden_states
 sliced_model =dct.SlicedModel(model, start_layer=3, end_layer=5, layers_name="model.layers")
 with torch.no_grad():
     assert torch.allclose(sliced_model(hidden_states[3]), hidden_states[5])
 
+# %%
+d_model = model.config.hidden_size
+generated_ids = model.generate(**model_inputs, max_new_tokens=32, do_sample=False)
+completion = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
+print("====Actual Output====\n", completion)
+
 # %% [markdown]
 # slice we'll actually use
 
 # %%
 sliced_model = dct.SlicedModel(model, start_layer=SOURCE_LAYER_IDX, end_layer=TARGET_LAYER_IDX, layers_name="model.layers")
+
+import gc
+gc.collect()
+torch.cuda.empty_cache()
 
 # %%
 
@@ -145,6 +170,8 @@ for t in tqdm(range(0, NUM_SAMPLES, FORWARD_BATCH_SIZE)):
 # # class computing $\Delta_{\mathcal A}$
 
 # %%
+FACTOR_BATCH_SIZE = 32
+
 delta_acts_single = dct.DeltaActivations(sliced_model, target_position_indices=TOKEN_IDXS) # d_model, batch_size x seq_len x d_model, batch_size x seq_len x d_model
 # -> batch_size x d_model
 delta_acts = vmap(delta_acts_single, in_dims=(1,None,None), out_dims=2,
@@ -180,6 +207,9 @@ U,V = exp_dct.fit(delta_acts_single, X, Y, batch_size=BACKWARD_BATCH_SIZE, facto
 # %%
 from matplotlib import pyplot as plt
 plt.plot(exp_dct.objective_values)
+
+gc.collect()
+torch.cuda.empty_cache()
 
 # %% [markdown]
 # # Visualize factor similarities
@@ -252,12 +282,6 @@ model_editor = dct.ModelEditor(model, layers_name="model.layers")
 # %% [markdown]
 # # Actual Output
 
-# %%
-d_model = model.config.hidden_size
-model_editor.restore()
-generated_ids = model.generate(**model_inputs, max_new_tokens=32, do_sample=False)
-completion = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
-print("====Actual Output====\n", completion)
 
 # %%
 
@@ -269,7 +293,7 @@ print("====Actual Output====\n", completion)
 from torch import nn
 
 # %%
-NUM_EVAL = 64
+NUM_EVAL = 128
 MAX_NEW_TOKENS = 32
 
 # %%
@@ -294,7 +318,7 @@ for i in range(NUM_EVAL):
 # ## Steer
 
 # %%
-MAX_NEW_TOKENS = 256
+MAX_NEW_TOKENS = 128
 from torch import nn
 
 # %%
@@ -303,7 +327,7 @@ V.shape, V[:, indices[0]].shape
 model_editor.restore()
 completions = []
 prompt = EXAMPLES[0]
-for i in tqdm(range(NUM_EVAL)):
+for i in tqdm(range(256, 256+NUM_EVAL)):
     model_editor.restore()
     model_editor.steer(INPUT_SCALE*V[:,indices[i]], SOURCE_LAYER_IDX)
     generated_ids = model.generate(**model_inputs, max_new_tokens=MAX_NEW_TOKENS, do_sample=False)
@@ -322,22 +346,38 @@ from functools import partial
 importlib.reload(core)
 save_vector = partial(core.save_vector, model_name=MODEL_NAME, source_layer_idx=SOURCE_LAYER_IDX, target_layer_idx=TARGET_LAYER_IDX, scale=INPUT_SCALE)
 
-save_vector(vector=V[:,indices[0]], concept="Medical history context")
+save_vector(vector=V[:,indices[53]], concept="Where followed by clause 1")
+save_vector(vector=V[:,indices[73]], concept="Where followed by clause 2")
+save_vector(vector=V[:,indices[124]], concept="Where followed by clause 3")
+save_vector(vector=V[:,indices[128+17]], concept="Where followed by clause 4")
+save_vector(vector=V[:,indices[256+45]], concept="Where followed by clause 6")
+save_vector(vector=V[:,indices[256+47]], concept="Where followed by clause 7")
+save_vector(vector=V[:,indices[256+113]], concept="Where followed by clause 8")
+
+V.save("V.pt")
+indices.save("indices.pt")
+INPUT_SCALE.save("INPUT_SCALE.pt")
+
+# %%
+model_editor.restore()
+model_editor.steer(INPUT_SCALE*V[:,indices[14]], SOURCE_LAYER_IDX)
 
 # %%
 import gradio as gr
 from transformers import pipeline
 
-model_editor.restore()
-# model_editor.steer(INPUT_SCALE*V[:,indices[0]], SOURCE_LAYER_IDX)
 chatbot = pipeline("text-generation", model=model, tokenizer=tokenizer, do_sample=False)
 
 def chat_fn(message, history):
     conv = [{"role": "system", "content": SYSTEM_PROMPT}]
-    conv += [{"role": "user" if i%2 == 0 else "assistant", "content": h} for i, h in enumerate(history)]
     conv += [{"role": "user", "content": message}]
-    chat = tokenizer.apply_chat_template(conv, add_special_tokens=False, tokenize=False, add_generation_prompt=True)
+    chat = tokenizer.apply_chat_template(conv, add_special_tokens=True, tokenize=False, add_generation_prompt=True)
+    # conv = [{"role": "system", "content": SYSTEM_PROMPT}]
+    # conv += [{"role": "user" if i%2 == 0 else "assistant", "content": h} for i, h in enumerate(history)]
+    # conv += [{"role": "user", "content": message}]
+    # chat = tokenizer.apply_chat_template(conv, add_special_tokens=False, tokenize=False, add_generation_prompt=True)
     response = chatbot(chat, max_new_tokens=128)[0]['generated_text']
+    print(response)
     return response
 
 gr.ChatInterface(chat_fn).launch(inline=True)
