@@ -6,7 +6,7 @@
 __all__ = ['get_prompt', 'get_prompt_suffix', 'save_vector']
 
 # %% ../nbs/00_core.ipynb 4
-def get_prompt(type: str, verbose=False):
+def get_prompt(type: str, verbose=False, suffix: str = None, i=0):
     import datasets
 
     summeval = datasets.load_dataset("mteb/summeval", split="test")
@@ -17,8 +17,11 @@ def get_prompt(type: str, verbose=False):
     if verbose:
         print("Geval prompt: ", geval_coh)
 
-    document = summeval[0]['text']
-    summary = summeval[0]['machine_summaries'][0]
+    document = summeval[i]['text']
+    if suffix is not None:
+        summary = summeval[i]['machine_summaries'][0] +" "+ suffix
+    else:
+        summary = summeval[i]['machine_summaries'][0]
     if verbose:
         print("Document: ", document)
         print("Summary: ", summary)
