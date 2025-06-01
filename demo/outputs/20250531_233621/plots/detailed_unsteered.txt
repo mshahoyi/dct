@@ -1,0 +1,64 @@
+=====Unsteered completion=====
+You are a helpful assistant<｜User｜>You will be given one summary written for a news article.
+
+Your task is to rate the summary on one metric.
+
+Please make sure you read and understand these instructions carefully. Please keep this document open while reviewing, and refer to it as needed.
+
+
+Evaluation Criteria:
+
+Fluency (1-3): the quality of the summary in terms of grammar, spelling, punctuation, word choice, and sentence structure.
+
+- 1: The summary has many errors that make it hard to understand or sound unnatural.
+- 2: The summary has some errors that affect the clarity or smoothness of the text, but the main points are still comprehensible.
+- 3: The summary has few or no errors and is easy to read and follow.
+
+
+Example:
+
+Summary:
+
+donald sterling , nba team last year . sterling 's wife sued for $ 2.6 million in gifts . sterling says he is the former female companion who has lost the . sterling has ordered v. stiviano to pay back $ 2.6 m in gifts after his wife sued . sterling also includes a $ 391 easter bunny costume , $ 299 and a $ 299 .
+
+
+
+Give an Evaluation Form Below. Please provide your score for coherence based on the summary provided (scores ONLY).<｜Assistant｜>Evaluation Form:
+- Fluency: 1
+</think>
+Fluency: 1
+
+The summary is extremely difficult to understand due to multiple errors in grammar, punctuation, and word choice. The sentence structure is jumbled, and there are repetitions and nonsensical phrases like "$299 and a $299." The mention of an Easter bunny costume in the context of gifts seems unrelated and confusing. Additionally, the summary lacks proper capitalization and has unclear references (e.g., "sterling says he is the former female companion who has lost the"). These errors significantly hinder comprehension and coherence.
+
+=====Unsteered completion=====
+You are a helpful assistant<｜User｜>You will be given one summary written for a news article.
+
+Your task is to rate the summary on one metric.
+
+Please make sure you read and understand these instructions carefully. Please keep this document open while reviewing, and refer to it as needed.
+
+
+Evaluation Criteria:
+
+Fluency (1-3): the quality of the summary in terms of grammar, spelling, punctuation, word choice, and sentence structure.
+
+- 1: The summary has many errors that make it hard to understand or sound unnatural.
+- 2: The summary has some errors that affect the clarity or smoothness of the text, but the main points are still comprehensible.
+- 3: The summary has few or no errors and is easy to read and follow.
+
+
+Example:
+
+Summary:
+
+donald sterling , nba team last year . sterling 's wife sued for $ 2.6 million in gifts . sterling says he is the former female companion who has lost the . sterling has ordered v. stiviano to pay back $ 2.6 m in gifts after his wife sued . sterling also includes a $ 391 easter bunny costume , $ 299 and a $ 299 .
+
+
+
+Give an Evaluation Form Below. Please provide your score for coherence based on the summary provided (scores ONLY).<｜Assistant｜>Evaluation Form:
+- Fluency: 1
+</think>
+Fluency: 1
+
+The summary is extremely difficult to understand due to multiple errors in grammar, punctuation, and word choice. The sentence structure is jumbled, and there are repetitions and nonsensical phrases like "$299 and a $299." The mention of an Easter bunny costume in the context of gifts seems unrelated and confusing. Additionally, the summary lacks proper capitalization and has unclear references (e.g., "sterling says he is the former female companion who has lost the"). These errors significantly hinder comprehension and coherence.
+

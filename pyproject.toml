@@ -9,4 +9,6 @@ name = "melbo_dct_post"
 version = "0.1.0"
 dependencies = [
     "transformers==4.46.3",
+    "torch>=2.2.1",
+    "tqdm>=4.65.0",
 ]

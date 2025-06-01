@@ -1,0 +1,100 @@
+2025-05-31 23:36:21,959 [INFO] Starting run at 20250531_233621
+2025-05-31 23:36:21,959 [INFO] Plots will be saved under: outputs/20250531_233621/plots
+2025-05-31 23:36:21,959 [INFO] Logs will be saved under: outputs/20250531_233621/logs/run_20250531_233621.log
+2025-05-31 23:36:23,509 [INFO] MODEL_NAME = deepseek-ai/DeepSeek-R1-0528-Qwen3-8B
+2025-05-31 23:36:23,510 [INFO] SOURCE_LAYER_IDX = 10, TARGET_LAYER_IDX = 20
+2025-05-31 23:36:23,510 [INFO] NUM_FACTORS = 512, FACTOR_BATCH_SIZE = 256
+2025-05-31 23:36:23,702 [INFO] PyTorch version 2.3.1+cu118 available.
+2025-05-31 23:36:25,764 [INFO] Loaded instruction prompt.
+2025-05-31 23:36:25,764 [INFO] Prompt: "You will be given one summary written for a news article.\n\nYour task is to rate the summary on one metric.\n\nPlease make sure you read and understand these instructions carefully. Please keep this document open while reviewing, and refer to it as needed.\n\n\nEvaluation Criteria:\n\nFluency (1-3): the quality of the summary in terms of grammar, spelling, punctuation, word choice, and sentence structure.\n\n- 1: The summary has many errors that make it hard to understand or sound unnatural.\n- 2: The summary has some errors that affect the clarity or smoothness of the text, but the main points are still comprehensible.\n- 3: The summary has few or no errors and is easy to read and follow.\n\n\nExample:\n\nSummary:\n\ndonald sterling , nba team last year . sterling 's wife sued for $ 2.6 million in gifts . sterling says he is the former female companion who has lost the . sterling has ordered v. stiviano to pay back $ 2.6 m in gifts after his wife sued . sterling also includes a $ 391 easter bunny costume , $ 299 and a $ 299 .\n\n\n\nGive an Evaluation Form Below. Please provide your score for coherence based on the summary provided (scores ONLY)."
+2025-05-31 23:36:26,920 [INFO] Prepared EXAMPLES and TEST_EXAMPLES.
+2025-05-31 23:36:26,920 [INFO] Loading model ...
+2025-05-31 23:36:36,263 [INFO] Model loaded.
+2025-05-31 23:36:37,895 [INFO] Sliced‐model sanity check passed.
+2025-05-31 23:36:37,920 [INFO] Computing unsteered activations ...
+2025-05-31 23:36:38,048 [INFO] Built X and Y tensors for unsteered activations.
+2025-05-31 23:36:38,048 [INFO] ΔActivations function set up.
+2025-05-31 23:36:38,048 [INFO] Calibrating INPUT_SCALE ...
+2025-05-31 23:36:50,206 [INFO] INPUT_SCALE = 10.170884609221646
+2025-05-31 23:36:50,206 [INFO] Fitting Exponential DCT ...
+2025-05-31 23:38:24,403 [INFO] Exponential DCT fit complete.
+2025-05-31 23:38:24,974 [INFO] Saved plot: outputs/20250531_233621/plots/objective_values.png
+2025-05-31 23:38:25,755 [INFO] Saved plot: outputs/20250531_233621/plots/simu_distribution.png
+2025-05-31 23:38:26,106 [INFO] Saved plot: outputs/20250531_233621/plots/simv_distribution.png
+2025-05-31 23:38:26,107 [INFO] Generating unsteered sample ...
+2025-05-31 23:38:30,548 [INFO] Unsteered completion:
+You are a helpful assistant<｜User｜>You will be given one summary written for a news article.
+
+Your task is to rate the summary on one metric.
+
+Please make sure you read and understand these instructions carefully. Please keep this document open while reviewing, and refer to it as needed.
+
+
+Evaluation Criteria:
+
+Fluency (1-3): the quality of the summary in terms of grammar, spelling, punctuation, word choice, and sentence structure.
+
+- 1: The summary has many errors that make it hard to understand or sound unnatural.
+- 2: The summary has some errors that affect the clarity or smoothness of the text, but the main points are still comprehensible.
+- 3: The summary has few or no errors and is easy to read and follow.
+
+
+Example:
+
+Summary:
+
+donald sterling , nba team last year . sterling 's wife sued for $ 2.6 million in gifts . sterling says he is the former female companion who has lost the . sterling has ordered v. stiviano to pay back $ 2.6 m in gifts after his wife sued . sterling also includes a $ 391 easter bunny costume , $ 299 and a $ 299 .
+
+
+
+Give an Evaluation Form Below. Please provide your score for coherence based on the summary provided (scores ONLY).<｜Assistant｜>Evaluation Form:
+- Fluency: 1
+</think>
+Fluency: 1
+
+The summary is extremely difficult to understand due to multiple errors in grammar, punctuation, and word choice. The sentence structure is jumbled, and there are repetitions and nonsensical phrases like "$299 and a $299." The mention of an
+2025-05-31 23:38:30,550 [INFO] Ranking factors based on custom target_vec ...
+2025-05-31 23:38:42,578 [INFO] Saved plot: outputs/20250531_233621/plots/ranking_scores.png
+2025-05-31 23:38:44,872 [INFO] ====Actual Output (baseline)====
+You are a helpful assistant<｜User｜>You will be given one summary written for a news article.
+
+Your task is to rate the summary on one metric.
+
+Please make sure you read and understand these instructions carefully. Please keep this document open while reviewing, and refer to it as needed.
+
+
+Evaluation Criteria:
+
+Fluency (1-3): the quality of the summary in terms of grammar, spelling, punctuation, word choice, and sentence structure.
+
+- 1: The summary has many errors that make it hard to understand or sound unnatural.
+- 2: The summary has some errors that affect the clarity or smoothness of the text, but the main points are still comprehensible.
+- 3: The summary has few or no errors and is easy to read and follow.
+
+
+Example:
+
+Summary:
+
+donald sterling , nba team last year . sterling 's wife sued for $ 2.6 million in gifts . sterling says he is the former female companion who has lost the . sterling has ordered v. stiviano to pay back $ 2.6 m in gifts after his wife sued . sterling also includes a $ 391 easter bunny costume , $ 299 and a $ 299 .
+
+
+
+Give an Evaluation Form Below. Please provide your score for coherence based on the summary provided (scores ONLY).<｜Assistant｜>Evaluation Form:
+- Fluency: 1
+</think>
+Fluency: 1
+
+The summary is extremely difficult to understand due to multiple errors in grammar, punctuation, and word choice.
+2025-05-31 23:38:44,873 [INFO] Running random steering baseline for 128 vectors ...
+2025-05-31 23:43:19,526 [INFO] Saved random baseline completions to outputs/20250531_233621/plots/random_baseline_completions.txt
+2025-05-31 23:43:19,526 [INFO] Running steering with top 128 factors ...
+2025-06-01 00:09:59,090 [INFO] Saved steered completions to outputs/20250531_233621/plots/steered_completions.txt
+2025-06-01 00:09:59,094 [INFO] Saved representative factor vector with `core.save_vector()`.
+2025-06-01 00:10:00,590 [INFO] Launching Gradio chat interface on localhost:7860 ...
+2025-06-01 00:10:00,842 [INFO] HTTP Request: GET http://127.0.0.1:7860/gradio_api/startup-events "HTTP/1.1 200 OK"
+2025-06-01 00:10:00,877 [INFO] HTTP Request: HEAD http://127.0.0.1:7860/ "HTTP/1.1 200 OK"
+2025-06-01 00:10:01,356 [INFO] HTTP Request: GET https://api.gradio.app/pkg-version "HTTP/1.1 200 OK"
+2025-06-01 00:10:53,251 [INFO] Running detailed unsteered eval ...
+2025-06-01 00:11:02,214 [INFO] Saved detailed unsteered completions to outputs/20250531_233621/plots/detailed_unsteered.txt
+2025-06-01 00:11:02,214 [INFO] Running detailed steered eval with vector index 0 ...

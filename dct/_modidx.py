@@ -6,4 +6,5 @@ d = { 'settings': { 'branch': 'main',
                 'git_url': 'https://github.com/mshahoyi/dct',
                 'lib_path': 'dct'},
   'syms': { 'dct.core': { 'dct.core.get_prompt': ('core.html#get_prompt', 'dct/core.py'),
-                          'dct.core.get_prompt_suffix': ('core.html#get_prompt_suffix', 'dct/core.py')}}}
+                          'dct.core.get_prompt_suffix': ('core.html#get_prompt_suffix', 'dct/core.py'),
+                          'dct.core.save_vector': ('core.html#save_vector', 'dct/core.py')}}}
